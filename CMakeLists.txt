@@ -24,7 +24,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         drawer.h drawer.cpp
+<<<<<<< HEAD
         tescik.h tescik.cpp
+=======
+>>>>>>> 1ed93fd936493a1e7341a322926a5bdea8147da9
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET wykresy APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
