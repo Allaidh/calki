@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <qpushbutton.h>
+#include "drawer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -16,8 +18,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void openDrawer();
+    bool eventFilter(QObject *obj, QEvent *event);
 
 private:
     Ui::MainWindow *ui;
+    drawer *drawer;
+    QPushButton *button;
 };
 #endif // MAINWINDOW_H
