@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QResizeEvent>
+#include <QLineEdit>
+#include <QPushButton>
 
 class drawer : public QWidget
 {
@@ -17,6 +19,8 @@ protected:
 private:
     bool isOpen;
     void setupUI();
+    QLineEdit *functionInput;
+    QPushButton *drawButton;
 
 signals:
 };
