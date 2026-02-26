@@ -76,14 +76,35 @@ void drawer::addFunction()
 
     funkcje[ile] = text; // zapis do tablicy
     ile++;
+    clearLayout(functions);
+    wypisz(functions);
+    // QLabel *newLabel = new QLabel(text, this);
+    // newLabel->setStyleSheet("color: white; background-color: #1e1e1e; padding: 3px;");
 
-    // Dodaj nowy label **bez kasowania wcześniejszych**
-    QLabel *newLabel = new QLabel(text, this);
-    newLabel->setStyleSheet("color: white; background-color: #1e1e1e; padding: 3px;");
 
-    // Dodajemy przed stretch (jeśli stretch istnieje na końcu)
-    int stretchIndex = functions->count(); // jeśli nie ma stretchu na końcu
-    functions->insertWidget(stretchIndex, newLabel);
+    // int stretchIndex = functions->count();
+    // functions->insertWidget(stretchIndex, newLabel);
 
     functionInput->clear();
+}
+void drawer::clearLayout(QVBoxLayout* layout){
+    if (!layout) return;
+
+    while (QLayoutItem* item = layout->takeAt(0))
+    {
+        if (QWidget* widget = item->widget())
+            widget->deleteLater();
+
+        delete item;
+    }
+}
+void drawer::wypisz(QVBoxLayout* layout)
+{
+    for(int i = 0; i < ile; i++)
+    {
+        QLabel *newLabel = new QLabel(funkcje[i], this);
+        newLabel->setStyleSheet("color: white; background-color: #1e1e1e; padding: 3px;");
+        layout->insertWidget(i, newLabel);
+    }
+    functions->addStretch();
 }

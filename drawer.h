@@ -28,6 +28,9 @@ private:
     QLineEdit *functionInput;
     QPushButton *drawButton;
     QVBoxLayout *functions;
+    void clearLayout(QVBoxLayout* layout);
+    void wypisz(QVBoxLayout* layout);
+
 private slots:
     void addFunction();
 signals:

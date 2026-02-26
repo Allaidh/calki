@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     // range for series
-    int zakres = 1000;
+    int zakres = 10;
 
     // Chart + series
     QLineSeries *series = new QLineSeries();
