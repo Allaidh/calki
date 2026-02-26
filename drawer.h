@@ -2,6 +2,7 @@
 #define DRAWER_H
 
 #include <QWidget>
+#include <QMessageBox>
 #include <QResizeEvent>
 #include <QLineEdit>
 #include <QPushButton>
