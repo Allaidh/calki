@@ -2,6 +2,7 @@
 #define DRAWER_H
 
 #include <QWidget>
+#include <QMessageBox>
 #include <QResizeEvent>
 #include <QLineEdit>
 #include <QPushButton>
@@ -18,6 +19,8 @@ public:
     QString funkcje[20];
     int ile;
     void toggle();
+    void clearLayout(QVBoxLayout* layout);
+    void wypisz(QVBoxLayout* layout);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -28,8 +31,7 @@ private:
     QLineEdit *functionInput;
     QPushButton *drawButton;
     QVBoxLayout *functions;
-    void clearLayout(QVBoxLayout* layout);
-    void wypisz(QVBoxLayout* layout);
+
 
 private slots:
     void addFunction();
