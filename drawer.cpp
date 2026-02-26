@@ -10,7 +10,7 @@ drawer::drawer(QWidget *parent) : QWidget(parent), isOpen(false) {
 void drawer::setupUI() {
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    QHBoxLayout *hlayout = new QHBoxLayout(this);
+    QHBoxLayout *hlayout = new QHBoxLayout();
 
     //Label do inputa
     QLabel *funcLabel = new QLabel("Podaj wzór funkcji:", this);
@@ -46,7 +46,7 @@ void drawer::setupUI() {
     //Dodawanie guzika
     hlayout -> addWidget(drawButton);
     //Layout funkcji
-    functions = new QVBoxLayout(this);
+    functions = new QVBoxLayout();
     functions -> setContentsMargins(50, 20, 0, 0);
     layout -> addLayout(hlayout);
     //************************
@@ -91,7 +91,7 @@ void drawer::addFunction()
         return;
     }
 
-    funkcje[ile] = text; // Zapisanie textu z inputa do tablicy
+    funkcje[ile] = text;
     ile++;
     clearLayout(functions);
     wypisz(functions);
@@ -107,16 +107,49 @@ void drawer::clearLayout(QVBoxLayout* layout){
         if (QWidget* widget = item->widget())
             widget->deleteLater();
 
+        if (item->layout())
+            clearLayout((QVBoxLayout*)item->layout());
+
         delete item;
     }
 }
-void drawer::wypisz(QVBoxLayout* layout)
-{
-    for(int i = 0; i < ile; i++)
-    {
-        QLabel *newLabel = new QLabel(funkcje[i], this);
-        newLabel->setStyleSheet("color: white; background-color: #1e1e1e; padding: 3px;");
-        layout->insertWidget(i, newLabel);
+void drawer::wypisz(QVBoxLayout* layout) {
+    for (int i = 0; i < ile; i++) {
+        QHBoxLayout* hLayout = new QHBoxLayout();
+
+        QLabel* label = new QLabel(funkcje[i], this);
+        label->setStyleSheet("color: white; background-color: #1e1e1e; padding: 3px;");
+        label -> setFixedWidth(100);
+
+        QPushButton* delButton = new QPushButton("❌", this);
+        delButton->setStyleSheet("background-color: #810000; color: white;");
+        delButton -> setFixedWidth(40);
+
+
+        connect(delButton, &QPushButton::clicked, this, [this, label]() {
+
+            int idx = -1;
+            for (int j = 0; j < ile; j++) {
+                if (funkcje[j] == label->text()) {
+                    idx = j;
+                    break;
+                }
+            }
+
+            if (idx == -1) return;
+
+            for (int j = idx; j < ile - 1; j++)
+                funkcje[j] = funkcje[j + 1];
+
+            ile--;
+
+            clearLayout(functions);
+            wypisz(functions);
+        });
+
+        hLayout->addWidget(label);
+        hLayout->addWidget(delButton);
+        hLayout->addStretch();
+        layout->addLayout(hLayout);
     }
-    layout->addStretch();
 }
