@@ -22,14 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
     // range for series
     int zakres = 10;
 
-    // Chart + series
-    QLineSeries *series = new QLineSeries();
-    for (double x = -zakres; x <= zakres; x += 0.1)
-        series -> append(x, std::sin(x));
 
     QChart *chart = new QChart();
     chart -> legend() -> hide();
-    chart -> addSeries(series);
 
     QValueAxis *axisX = new QValueAxis();
     axisX -> setRange(-zakres, zakres);
@@ -39,8 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
     axisY -> setLabelsVisible(true);
     chart -> addAxis(axisX, Qt::AlignBottom);
     chart -> addAxis(axisY, Qt::AlignLeft);
-    series -> attachAxis(axisX);
-    series -> attachAxis(axisY);
 
     // axis lines
     QLineSeries *yAxisLine = new QLineSeries();
@@ -65,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Drawer widget
     drawer -> setVisible(false);
     drawer -> setFixedWidth(600);
-    drawer -> setStyleSheet("background-color: #BADAFE;");
+    drawer -> setStyleSheet("background-color: black;");
 
 
     // Central widget + layout

@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QLabel>
+#include <muParser.h>
 
 class drawer : public QWidget
 {
