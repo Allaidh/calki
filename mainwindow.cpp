@@ -24,8 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Chart + series
     QLineSeries *series = new QLineSeries();
-    for (double x = -zakres; x <= zakres; x += 0.1)
-        series -> append(x, std::sin(x));
+
 
     QChart *chart = new QChart();
     chart -> legend() -> hide();

@@ -10,6 +10,9 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QLabel>
+extern "C" {
+    #include "tinyexpr.h"
+}
 
 class drawer : public QWidget
 {
@@ -21,6 +24,7 @@ public:
     void toggle();
     void clearLayout(QVBoxLayout* layout);
     void wypisz(QVBoxLayout* layout);
+    void add(const QString &exprStr);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

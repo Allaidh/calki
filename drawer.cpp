@@ -1,9 +1,9 @@
 #include "drawer.h"
 
+
 drawer::drawer(QWidget *parent) : QWidget(parent), isOpen(false) {
     ile = 0;
     setupUI();
-
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 }
 
@@ -91,6 +91,38 @@ void drawer::addFunction()
         return;
     }
 
+    double x;
+    /* Store variable names and pointers. */
+    te_variable vars[] = {{"x", &x}};
+
+    int err;
+    /* Compile the expression with variables. */
+    te_expr* expr = te_compile("x^2", vars, 1, &err);
+
+    if (!err) {
+        x = 3.0;
+        std::string value = std::to_string(te_eval(expr));
+        QMessageBox::information(
+            this,
+            tr("Informacja"),
+            tr(value.c_str()) );
+
+
+        x = 5.0;
+        value = std::to_string(te_eval(expr));
+        QMessageBox::information(
+            this,
+            tr("Informacja"),
+            tr(value.c_str()) );
+
+        te_free(expr);
+    } else {
+        QMessageBox::critical(
+            this,
+            tr("Error"),
+            tr("Błąd parsera.") );
+    }
+
     funkcje[ile] = text;
     ile++;
     clearLayout(functions);
@@ -153,3 +185,4 @@ void drawer::wypisz(QVBoxLayout* layout) {
         layout->addLayout(hLayout);
     }
 }
+
