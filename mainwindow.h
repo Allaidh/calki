@@ -2,7 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <qpushbutton.h>
+#include <QPushButton>
+#include <QChartView>
+#include <QValueAxis>
+#include <QList>
+#include <QLineSeries>
 #include "drawer.h"
 
 QT_BEGIN_NAMESPACE
@@ -25,5 +29,14 @@ private:
     Ui::MainWindow *ui;
     drawer *drawer;
     QPushButton *button;
+    QChartView *chartview;
+    QList<QLineSeries*> seriesList;
+    QValueAxis* axisX;
+    QValueAxis* axisY;
+
+private slots:
+    void onFunctionAdded(const QString &exprStr);
+    void onFunctionRemoved(const QString &exprStr);
 };
+
 #endif // MAINWINDOW_H

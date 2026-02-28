@@ -10,7 +10,9 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QLabel>
-#include <muParser.h>
+extern "C" {
+#include "tinyexpr.h"
+}
 
 class drawer : public QWidget
 {
@@ -22,6 +24,7 @@ public:
     void toggle();
     void clearLayout(QVBoxLayout* layout);
     void wypisz(QVBoxLayout* layout);
+    void add(const QString &exprStr);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -33,10 +36,12 @@ private:
     QPushButton *drawButton;
     QVBoxLayout *functions;
 
-
 private slots:
     void addFunction();
+
 signals:
+    void functionAdded(const QString &exprStr);
+    void functionRemoved(const QString &exprStr);
 };
 
 #endif // DRAWER_H

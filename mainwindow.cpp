@@ -22,18 +22,23 @@ MainWindow::MainWindow(QWidget *parent)
     // range for series
     int zakres = 10;
 
+    // Chart + series
+    QLineSeries *series = new QLineSeries();
 
     QChart *chart = new QChart();
     chart -> legend() -> hide();
+    chart -> addSeries(series);
 
-    QValueAxis *axisX = new QValueAxis();
+    axisX = new QValueAxis();
     axisX -> setRange(-zakres, zakres);
     axisX -> setLabelsVisible(true);
-    QValueAxis *axisY = new QValueAxis();
+    axisY = new QValueAxis();
     axisY -> setRange(-zakres, zakres);
     axisY -> setLabelsVisible(true);
     chart -> addAxis(axisX, Qt::AlignBottom);
     chart -> addAxis(axisY, Qt::AlignLeft);
+    series -> attachAxis(axisX);
+    series -> attachAxis(axisY);
 
     // axis lines
     QLineSeries *yAxisLine = new QLineSeries();
@@ -52,14 +57,13 @@ MainWindow::MainWindow(QWidget *parent)
     xAxisLine -> attachAxis(axisX);
     xAxisLine -> attachAxis(axisY);
 
-    QChartView *chartview = new QChartView(chart);
+    chartview = new QChartView(chart);
     chartview -> setRenderHint(QPainter::Antialiasing);
 
     // Drawer widget
     drawer -> setVisible(false);
     drawer -> setFixedWidth(600);
-    drawer -> setStyleSheet("background-color: black;");
-
+    drawer -> setStyleSheet("background-color: #BADAFE;");
 
     // Central widget + layout
     QWidget *centralWidget = new QWidget(this);
@@ -103,9 +107,11 @@ MainWindow::MainWindow(QWidget *parent)
     buttonOverlay -> raise();
     buttonOverlay -> show();
 
-
     // Keep overlay positioned on chart container resize: install event filter on chartview->viewport()
     chartview -> viewport() -> installEventFilter(this);
+
+    connect(drawer, &drawer::functionAdded, this, &MainWindow::onFunctionAdded);
+    connect(drawer, &drawer::functionRemoved, this, &MainWindow::onFunctionRemoved);
 }
 
 void MainWindow::openDrawer()
@@ -144,4 +150,44 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         }
     }
     return QMainWindow::eventFilter(obj, event);
+}
+
+void MainWindow::onFunctionAdded(const QString &exprStr)
+{
+    double x;
+    te_variable vars[] = {{"x", &x}};
+    int err;
+
+    std::string exprStd = exprStr.toStdString();
+    te_expr* expr = te_compile(exprStd.c_str(), vars, 1, &err);
+
+    if (err == 0 && expr) {
+        QLineSeries *series = new QLineSeries();
+        seriesList.append(series);
+
+        for (double xv = -10; xv <= 10; xv += 0.1) {
+            x = xv;
+            series->append(xv, te_eval(expr));
+        }
+
+        QChart *chart = chartview->chart();
+        chart->addSeries(series);
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
+        te_free(expr);
+    } else {
+        QMessageBox::warning(this, "Błąd", "Nieprawidłowe wyrażenie!");
+    }
+}
+
+void MainWindow::onFunctionRemoved(const QString &exprStr)
+{
+    for (int i = 0; i < seriesList.size(); i++) {
+        QLineSeries *series = seriesList.at(i);
+        QChart *chart = chartview->chart();
+        chart->removeSeries(series);
+        delete series;
+        seriesList.removeAt(i);
+        break;
+    }
 }
