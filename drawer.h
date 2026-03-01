@@ -15,6 +15,7 @@ public:
     void clearLayout(QVBoxLayout* layout);
     void wypisz(QVBoxLayout* layout);
     void add(const QString &exprStr);
+    double calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -27,6 +28,7 @@ private:
     QPushButton *colorButton;
     QVBoxLayout *functions;
     QColor currentColor;
+
 
 private slots:
     void addFunction();

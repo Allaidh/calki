@@ -88,9 +88,8 @@ void drawer::addFunction()
         return;
     }
 
-    funkcje[ile] = text;
+
     kolory[ile] = currentColor;
-    ile++;
 
     emit functionAdded(text, currentColor);
 
@@ -137,6 +136,8 @@ void drawer::wypisz(QVBoxLayout* layout) {
         calka->setStyleSheet("background-color: #333333; color: white;");
         calka->setFixedWidth(40);
 
+        // Usuń stąd QLabel* wynik - przeniesiemy go do okna dialogowego
+
         QString text = funkcje[i];
         QColor funcColor = kolory[i];
 
@@ -176,16 +177,59 @@ void drawer::wypisz(QVBoxLayout* layout) {
             QLineEdit *b = new QLineEdit();
             b->setPlaceholderText("Podaj b:");
 
+            // Dodaj etykietę do wyświetlania wyniku
+            QLabel *wynikLabel = new QLabel("Wynik: ");
+            wynikLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold;");
+            wynikLabel->setAlignment(Qt::AlignCenter);
+
             QCheckBox *check = new QCheckBox("Kocham femboyi :3");
             check->setStyleSheet("color: white;");
 
-            QPushButton* guzior = new QPushButton("Wprowadź");
-            guzior->setStyleSheet("background-color: #1D4C5B; color: white;");
+            QPushButton* guzior = new QPushButton("Oblicz całkę");
+            guzior->setStyleSheet("background-color: #1D4C5B; color: white; padding: 5px;");
+
+            connect(guzior, &QPushButton::clicked, this, [this, text, a, b, wynikLabel]() {
+                QString atext = a->text();
+                QString btext = b->text();
+
+                // Sprawdź czy pola nie są puste
+                if(atext.isEmpty() || btext.isEmpty()) {
+                    QMessageBox::critical(nullptr, "Błąd", "Podaj granice całkowania a i b");
+                    return;
+                }
+
+                bool aOk, bOk;
+                double aVal = atext.toDouble(&aOk);
+                double bVal = btext.toDouble(&bOk);
+
+                if(!aOk || !bOk) {
+                    QMessageBox::critical(nullptr, "Błąd", "Granice całkowania muszą być liczbami");
+                    return;
+                }
+
+                double x;
+                te_variable vars[] = {{"x", &x}};
+                int err;
+
+                std::string f = text.toStdString();
+                te_expr* expr = te_compile(f.c_str(), vars, 1, &err);
+
+                if(!expr) {
+                    QMessageBox::critical(nullptr, "Błąd", "Nieprawidłowe wyrażenie matematyczne");
+                    return;
+                }
+
+                double integral = calculateIntegral(expr, aVal, bVal, 0.1, &x);
+                wynikLabel->setText("Wynik: " + QString::number(integral, 'g', 6));
+
+                te_free(expr);
+            });
 
             hlayout->addWidget(a);
             hlayout->addWidget(b);
 
             layout->addLayout(hlayout);
+            layout->addWidget(wynikLabel);
             layout->addWidget(check);
             layout->addStretch();
             layout->addWidget(guzior);
@@ -198,9 +242,48 @@ void drawer::wypisz(QVBoxLayout* layout) {
 
         hLayout->addWidget(colorLabel);
         hLayout->addWidget(label);
-        hLayout->addWidget(delButton);
+
         hLayout->addWidget(calka);
         hLayout->addStretch();
+        hLayout->addWidget(delButton);
+        // Usuń dodawanie wynik do hLayout
         layout->addLayout(hLayout);
     }
+}
+
+double drawer::calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr)
+{
+    double& x = *xPtr;
+    double sum = 0.0;
+    int n = static_cast<int>(ceil((b - a) / step));
+    for(int i = 0; i < n; ++i)
+    {
+        double x0 = a + i * step;
+        double x1 = a + (i + 1) * step;
+
+        x = x0;
+        double y0 = te_eval(expr);
+
+        x = x1;
+        double y1 = te_eval(expr);
+
+        sum += (y0 + y1) / 2.0 * step;
+    }
+
+    double last = a + n * step;
+    if(last < b)
+    {
+        x = last;
+        double y0 = te_eval(expr);
+        x = b;
+        double y1 = te_eval(expr);
+        sum += (y0 + y1) / 2.0 * (b - last);
+    }
+
+    if(a == -b && fabs(sum) < 1e-12)
+    {
+        sum = 0.0;
+    }
+
+    return sum;
 }

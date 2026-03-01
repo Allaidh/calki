@@ -198,11 +198,7 @@ void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color)
         area->setBrush(QBrush(fillColor));
         area->setPen(QPen(color, 1));
 
-        double integral = calculateIntegral(expr, -10, 10, 0.1, &x);
-        QMessageBox::information(this, "Całka",
-                                 QString("Całka funkcji %1 od -10 do 10 wynosi %2")
-                                     .arg(exprStr)
-                                     .arg(integral));
+
 
         chart->addSeries(area);
         chart->addSeries(series);
@@ -213,6 +209,9 @@ void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color)
         area->attachAxis(axisY);
 
         seriesList.append({exprStr, series, area, color});
+
+        drawer->funkcje[drawer->ile] = exprStr;
+        drawer->ile++;
 
         te_free(expr);
     } else {
@@ -238,39 +237,4 @@ void MainWindow::onFunctionRemoved(const QString &exprStr)
     }
 }
 
-double MainWindow::calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr)
-{
-    double& x = *xPtr;
-    double sum = 0.0;
-    int n = static_cast<int>(ceil((b - a) / step));
-    for(int i = 0; i < n; ++i)
-    {
-        double x0 = a + i * step;
-        double x1 = a + (i + 1) * step;
 
-        x = x0;
-        double y0 = te_eval(expr);
-
-        x = x1;
-        double y1 = te_eval(expr);
-
-        sum += (y0 + y1) / 2.0 * step;
-    }
-
-    double last = a + n * step;
-    if(last < b)
-    {
-        x = last;
-        double y0 = te_eval(expr);
-        x = b;
-        double y1 = te_eval(expr);
-        sum += (y0 + y1) / 2.0 * (b - last);
-    }
-
-    if(a == -b && fabs(sum) < 1e-12)
-    {
-        sum = 0.0;
-    }
-
-    return sum;
-}
