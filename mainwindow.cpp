@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "includer.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -128,6 +127,7 @@ MainWindow::MainWindow(QWidget *parent)
     // --- POŁĄCZENIA SYGNAŁÓW ---
     connect(drawer, &drawer::functionAdded, this, &MainWindow::onFunctionAdded);
     connect(drawer, &drawer::functionRemoved, this, &MainWindow::onFunctionRemoved);
+    connect(drawer, &drawer::integralChanged, this, &MainWindow::onIntegralChanged);  // ✅ Nowe połączenie
 }
 
 void MainWindow::openDrawer()
@@ -165,7 +165,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QMainWindow::eventFilter(obj, event);
 }
 
-void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color)
+void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color, double a, double b)
 {
     double x;
     te_variable vars[] = {{"x", &x}};
@@ -176,14 +176,15 @@ void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color)
 
     if (err == 0 && expr) {
         QLineSeries *series = new QLineSeries();
-
         series->setPen(QPen(color, 2));
 
+        // ✅ Generowanie punktów funkcji
         for (double xv = -10; xv <= 10; xv += 0.1) {
             x = xv;
             series->append(xv, te_eval(expr));
         }
 
+        // ✅ Linia dolna dla obszaru pod wykresem
         QLineSeries *gorna = series;
         QLineSeries *dolna = new QLineSeries();
         dolna->append(series->at(0).x(), 0);
@@ -192,30 +193,65 @@ void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color)
         }
 
         QAreaSeries *area = new QAreaSeries(gorna, dolna);
-
         QColor fillColor = color;
-        fillColor.setAlpha(50);
+        fillColor.setAlpha(30);
         area->setBrush(QBrush(fillColor));
         area->setPen(QPen(color, 1));
 
+        // ✅ Obszar CAŁKI (pomiędzy a i b)
+        QLineSeries *integralUpper = new QLineSeries();
+        QLineSeries *integralLower = new QLineSeries();
 
+        for (double xv = a; xv <= b; xv += 0.1) {
+            x = xv;
+            integralUpper->append(xv, te_eval(expr));
+            integralLower->append(xv, 0);
+        }
+        // ✅ Dodaj ostatni punkt jeśli nie trafił w krok
+        if (integralUpper->count() == 0 || integralUpper->at(integralUpper->count() - 1).x() < b) {
+            x = b;
+            integralUpper->append(b, te_eval(expr));
+            integralLower->append(b, 0);
+        }
 
+        QAreaSeries *integralArea = new QAreaSeries(integralUpper, integralLower);
+        QColor integralColor = color;
+        integralColor.setAlpha(150);  // ✅ Bardziej widoczny obszar całki
+        integralArea->setBrush(QBrush(integralColor));
+        integralArea->setPen(QPen(color, 2));
+
+        // ✅ Oblicz całkę
+        double integral = calculateIntegral(expr, a, b, 0.01, &x);
+        drawer->wyniki[drawer->ile - 1] = integral;
+
+        // ✅ Dodaj do wykresu
         chart->addSeries(area);
         chart->addSeries(series);
+        chart->addSeries(integralArea);
 
         series->attachAxis(axisX);
         series->attachAxis(axisY);
         area->attachAxis(axisX);
         area->attachAxis(axisY);
+        integralArea->attachAxis(axisX);
+        integralArea->attachAxis(axisY);
 
-        seriesList.append({exprStr, series, area, color});
+        seriesList.append({exprStr, series, area, integralArea, color, a, b});
 
         drawer->funkcje[drawer->ile] = exprStr;
         drawer->ile++;
 
+        // ✅ Odśwież listę z wynikami
+        drawer->clearLayout(drawer->functions);
+        drawer->wypisz(drawer->functions);
+
         te_free(expr);
     } else {
         QMessageBox::warning(this, "Błąd", "Nieprawidłowe wyrażenie!");
+        // Cofnij changes w drawerze
+        drawer->ile--;
+        drawer->clearLayout(drawer->functions);
+        drawer->wypisz(drawer->functions);
     }
 }
 
@@ -231,10 +267,100 @@ void MainWindow::onFunctionRemoved(const QString &exprStr)
             chart->removeSeries(seriesList[i].area);
             delete seriesList[i].area;
 
+            chart->removeSeries(seriesList[i].integralArea);  // ✅ Usuń obszar całki
+            delete seriesList[i].integralArea;
+
             seriesList.removeAt(i);
             break;
         }
     }
 }
 
+void MainWindow::onIntegralChanged(int index, double a, double b, double result)
+{
+    if (index < 0 || index >= seriesList.size()) return;
 
+    QChart *chart = chartview->chart();
+
+    // ✅ Usuń stary obszar całki
+    chart->removeSeries(seriesList[index].integralArea);
+    delete seriesList[index].integralArea;
+
+    // ✅ Utwórz nowy obszar całki
+    double x;
+    te_variable vars[] = {{"x", &x}};
+    int err;
+
+    std::string exprStd = seriesList[index].expression.toStdString();
+    te_expr* expr = te_compile(exprStd.c_str(), vars, 1, &err);
+
+    if (err == 0 && expr) {
+        QLineSeries *integralUpper = new QLineSeries();
+        QLineSeries *integralLower = new QLineSeries();
+
+        for (double xv = a; xv <= b; xv += 0.1) {
+            x = xv;
+            integralUpper->append(xv, te_eval(expr));
+            integralLower->append(xv, 0);
+        }
+        if (integralUpper->count() == 0 || integralUpper->at(integralUpper->count() - 1).x() < b) {
+            x = b;
+            integralUpper->append(b, te_eval(expr));
+            integralLower->append(b, 0);
+        }
+
+        QAreaSeries *integralArea = new QAreaSeries(integralUpper, integralLower);
+        QColor integralColor = seriesList[index].color;
+        integralColor.setAlpha(150);
+        integralArea->setBrush(QBrush(integralColor));
+        integralArea->setPen(QPen(seriesList[index].color, 2));
+
+        chart->addSeries(integralArea);
+        integralArea->attachAxis(axisX);
+        integralArea->attachAxis(axisY);
+
+        // ✅ Zaktualizuj listę
+        seriesList[index].integralArea = integralArea;
+        seriesList[index].a = a;
+        seriesList[index].b = b;
+
+        te_free(expr);
+    }
+}
+
+double MainWindow::calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr)
+{
+    double& x = *xPtr;
+    double sum = 0.0;
+    int n = static_cast<int>(ceil((b - a) / step));
+    for(int i = 0; i < n; ++i)
+    {
+        double x0 = a + i * step;
+        double x1 = a + (i + 1) * step;
+
+        x = x0;
+        double y0 = te_eval(expr);
+
+        x = x1;
+        double y1 = te_eval(expr);
+
+        sum += (y0 + y1) / 2.0 * step;
+    }
+
+    double last = a + n * step;
+    if(last < b)
+    {
+        x = last;
+        double y0 = te_eval(expr);
+        x = b;
+        double y1 = te_eval(expr);
+        sum += (y0 + y1) / 2.0 * (b - last);
+    }
+
+    if(a == -b && fabs(sum) < 1e-12)
+    {
+        sum = 0.0;
+    }
+
+    return sum;
+}
