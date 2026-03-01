@@ -1,14 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QPushButton>
-#include <QChartView>
-#include <QValueAxis>
-#include <QList>
-#include <QLineSeries>
-#include <QAreaSeries>
 #include "drawer.h"
+#include "includer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,6 +14,7 @@ struct FunctionSeries {
     QString expression;
     QLineSeries* series;
     QAreaSeries* area;
+    QColor color;
 };
 
 class MainWindow : public QMainWindow
@@ -34,10 +29,9 @@ public:
     double calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr);
     QChart *chart;
 
-
 private:
     Ui::MainWindow *ui;
-    drawer *drawer;
+    ::drawer *drawer;
     QPushButton *button;
     QChartView *chartview;
     QList<FunctionSeries> seriesList;
@@ -45,7 +39,7 @@ private:
     QValueAxis* axisY;
 
 public slots:
-    void onFunctionAdded(const QString &exprStr);
+    void onFunctionAdded(const QString &exprStr, const QColor &color);
     void onFunctionRemoved(const QString &exprStr);
 };
 

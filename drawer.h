@@ -1,19 +1,7 @@
 #ifndef DRAWER_H
 #define DRAWER_H
 
-#include <QWidget>
-#include <QMessageBox>
-#include <QResizeEvent>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QResizeEvent>
-#include <QLabel>
-#include <QCheckBox>
-extern "C" {
-#include "tinyexpr.h"
-}
+#include "includer.h"
 
 class drawer : public QWidget
 {
@@ -21,6 +9,7 @@ class drawer : public QWidget
 public:
     explicit drawer(QWidget *parent = nullptr);
     QString funkcje[20];
+    QColor kolory[20];
     int ile;
     void toggle();
     void clearLayout(QVBoxLayout* layout);
@@ -35,13 +24,16 @@ private:
     void setupUI();
     QLineEdit *functionInput;
     QPushButton *drawButton;
+    QPushButton *colorButton;
     QVBoxLayout *functions;
+    QColor currentColor;
 
 private slots:
     void addFunction();
+    void pickColor();
 
 signals:
-    void functionAdded(const QString &exprStr);
+    void functionAdded(const QString &exprStr, const QColor &color);
     void functionRemoved(const QString &exprStr);
 };
 
