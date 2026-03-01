@@ -16,6 +16,12 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+struct FunctionSeries {
+    QString expression;
+    QLineSeries* series;
+    QAreaSeries* area;
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -34,8 +40,7 @@ private:
     drawer *drawer;
     QPushButton *button;
     QChartView *chartview;
-    QList<QLineSeries*> seriesList;
-    QList<QAreaSeries*> areasList;
+    QList<FunctionSeries> seriesList;
     QValueAxis* axisX;
     QValueAxis* axisY;
 

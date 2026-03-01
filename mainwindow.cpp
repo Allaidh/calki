@@ -203,7 +203,6 @@ void MainWindow::onFunctionAdded(const QString &exprStr)
 
     if (err == 0 && expr) {
         QLineSeries *series = new QLineSeries();
-        seriesList.append(series);
 
         for (double xv = -10; xv <= 10; xv += 0.1) {
             x = xv;
@@ -233,11 +232,15 @@ void MainWindow::onFunctionAdded(const QString &exprStr)
                                      .arg(exprStr)
                                      .arg(integral));
 
+        chart->addSeries(series);
         chart->addSeries(area);
-        areasList.append(area);
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
         area->attachAxis(axisX);
         area->attachAxis(axisY);
         //---------------------------
+
+        seriesList.append({exprStr, series, area});
 
         drawer->funkcje[drawer->ile] = exprStr;
         drawer->ile++;
@@ -256,16 +259,18 @@ void MainWindow::onFunctionAdded(const QString &exprStr)
 void MainWindow::onFunctionRemoved(const QString &exprStr)
 {
     for (int i = 0; i < seriesList.size(); i++) {
-        QLineSeries *series = seriesList.at(i);
-        QChart *chart = chartview->chart();
-        chart->removeSeries(series);
-        delete series;
-        seriesList.removeAt(i);
-        QAreaSeries *area = areasList.at(i);
-        chart->removeSeries(area);
-        delete area;
-        areasList.removeAt(i);
-        break;
+        if (seriesList[i].expression == exprStr) {  // ✅ Znajdź właściwą funkcję
+            QChart *chart = chartview->chart();
+
+            chart->removeSeries(seriesList[i].series);
+            delete seriesList[i].series;
+
+            chart->removeSeries(seriesList[i].area);
+            delete seriesList[i].area;
+
+            seriesList.removeAt(i);
+            break;  // ✅ Teraz break jest OK, bo znaleźliśmy właściwy element
+        }
     }
 }
 
