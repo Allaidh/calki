@@ -19,97 +19,137 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
 
-    // range for series
+    // --- KONFIGURACJA WYKRESU ---
     int zakres = 10;
 
-    // Chart + series
     QLineSeries *series = new QLineSeries();
-
     QChart *chart = new QChart();
-    chart -> legend() -> hide();
-    chart -> addSeries(series);
+    chart->legend()->hide();
+    chart->addSeries(series);
 
+    // ✅ FIX: Inicjalizacja zmiennych członkowskich (bez "QValueAxis *")
     axisX = new QValueAxis();
-    axisX -> setRange(-zakres, zakres);
-    axisX -> setLabelsVisible(true);
-    axisY = new QValueAxis();
-    axisY -> setRange(-zakres, zakres);
-    axisY -> setLabelsVisible(true);
-    chart -> addAxis(axisX, Qt::AlignBottom);
-    chart -> addAxis(axisY, Qt::AlignLeft);
-    series -> attachAxis(axisX);
-    series -> attachAxis(axisY);
+    axisX->setRange(-zakres, zakres);
+    axisX->setLabelsVisible(true);
 
-    // axis lines
+    axisY = new QValueAxis();
+    axisY->setRange(-zakres, zakres);
+    axisY->setLabelsVisible(true);
+
+    chart->addAxis(axisX, Qt::AlignBottom);
+    chart->addAxis(axisY, Qt::AlignLeft);
+    series->attachAxis(axisX);
+    series->attachAxis(axisY);
+
+    // --- OSI GŁÓWNE ---
     QLineSeries *yAxisLine = new QLineSeries();
-    yAxisLine -> append(0, -zakres);
-    yAxisLine -> append(0, zakres);
-    yAxisLine -> setPen(QPen(Qt::black, 1));
-    chart -> addSeries(yAxisLine);
-    yAxisLine -> attachAxis(axisX);
-    yAxisLine -> attachAxis(axisY);
+    yAxisLine->append(0, -zakres);
+    yAxisLine->append(0, zakres);
+    yAxisLine->setPen(QPen(Qt::black, 1));
+    chart->addSeries(yAxisLine);
+    yAxisLine->attachAxis(axisX);
+    yAxisLine->attachAxis(axisY);
 
     QLineSeries *xAxisLine = new QLineSeries();
-    xAxisLine -> append(-zakres, 0);
-    xAxisLine -> append(zakres, 0);
-    xAxisLine -> setPen(QPen(Qt::black, 1));
-    chart -> addSeries(xAxisLine);
-    xAxisLine -> attachAxis(axisX);
-    xAxisLine -> attachAxis(axisY);
+    xAxisLine->append(-zakres, 0);
+    xAxisLine->append(zakres, 0);
+    xAxisLine->setPen(QPen(Qt::black, 1));
+    chart->addSeries(xAxisLine);
+    xAxisLine->attachAxis(axisX);
+    xAxisLine->attachAxis(axisY);
 
+    // --- STRZAŁKI (GROTY OSI) ---
+    double arrowSize = 0.1; // ✅ Mniejsza wartość = węższa strzałka
+
+    // Strzałka osi X (prawa strona)
+    QLineSeries *xArrow1 = new QLineSeries();
+    QLineSeries *xArrow2 = new QLineSeries();
+
+    xArrow1->append(zakres, 0);
+    xArrow1->append(zakres - arrowSize, arrowSize);
+
+    xArrow2->append(zakres, 0);
+    xArrow2->append(zakres - arrowSize, -arrowSize);
+
+    xArrow1->setPen(QPen(Qt::black, 1));
+    xArrow2->setPen(QPen(Qt::black, 1));
+    chart->addSeries(xArrow1);
+    chart->addSeries(xArrow2);
+    xArrow1->attachAxis(axisX);
+    xArrow1->attachAxis(axisY);
+    xArrow2->attachAxis(axisX);
+    xArrow2->attachAxis(axisY);
+
+    // Strzałka osi Y (góra)
+    QLineSeries *yArrow1 = new QLineSeries();
+    QLineSeries *yArrow2 = new QLineSeries();
+
+    yArrow1->append(0, zakres);
+    yArrow1->append(-arrowSize * 0.8, zakres - 0.5 - arrowSize * 0.1);
+
+    yArrow2->append(0, zakres);
+    yArrow2->append(arrowSize * 0.8, zakres - 0.5 - arrowSize * 0.1);
+
+    yArrow1->setPen(QPen(Qt::black, 1));
+    yArrow2->setPen(QPen(Qt::black, 1));
+    chart->addSeries(yArrow1);
+    chart->addSeries(yArrow2);
+    yArrow1->attachAxis(axisX);
+    yArrow1->attachAxis(axisY);
+    yArrow2->attachAxis(axisX);
+    yArrow2->attachAxis(axisY);
+
+    // --- WIDOK WYKRESU ---
     chartview = new QChartView(chart);
-    chartview -> setRenderHint(QPainter::Antialiasing);
+    chartview->setRenderHint(QPainter::Antialiasing);
 
-    // Drawer widget
-    drawer -> setVisible(false);
-    drawer -> setFixedWidth(600);
-    drawer -> setStyleSheet("background-color: #BADAFE;");
+    // --- DRAWER (PANEL BOCZNY) ---
+    drawer->setVisible(false);
+    drawer->setFixedWidth(600);
+    drawer->setStyleSheet("background-color: #BADAFE;");
 
     // Central widget + layout
     QWidget *centralWidget = new QWidget(this);
     QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
-    mainLayout -> setContentsMargins(0,0,0,0);
-    mainLayout -> setSpacing(0);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    mainLayout -> addWidget(drawer);
+    mainLayout->addWidget(drawer);
 
-    // Chart container holds the chartview
     QWidget *chartContainer = new QWidget();
-    chartContainer -> setObjectName("chartContainer");
+    chartContainer->setObjectName("chartContainer");
     QVBoxLayout *chartContainerLayout = new QVBoxLayout(chartContainer);
-    chartContainerLayout -> setContentsMargins(0,0,0,0);
-    chartContainerLayout -> setSpacing(0);
-    chartContainerLayout -> addWidget(chartview);
+    chartContainerLayout->setContentsMargins(0, 0, 0, 0);
+    chartContainerLayout->setSpacing(0);
+    chartContainerLayout->addWidget(chartview);
 
-    mainLayout -> addWidget(chartContainer);
+    mainLayout->addWidget(chartContainer);
     setCentralWidget(centralWidget);
 
-    // Create the button and style it explicitly
+    // --- PRZYCISK PRZEŁĄCZANIA ---
     button = new QPushButton(tr("<"));
-    button -> setFixedSize(20, 20);
-    button -> setStyleSheet(
+    button->setFixedSize(20, 20);
+    button->setStyleSheet(
         "QPushButton { background-color: #1D4C5B; color: #ffffff; border-radius: 4px; font-size: 14px; } "
         "QPushButton:pressed { background-color: #4E9AC5; }");
     connect(button, &QPushButton::clicked, this, &MainWindow::openDrawer);
 
-    // Parent overlay/button to the chartview's viewport so it draws above the chart
     QWidget *buttonOverlay = new QWidget(chartview->viewport());
-    buttonOverlay -> setAttribute(Qt::WA_TranslucentBackground);
-    buttonOverlay -> setFixedSize(24, 24); // slightly larger than button for padding
+    buttonOverlay->setAttribute(Qt::WA_TranslucentBackground);
+    buttonOverlay->setFixedSize(24, 24);
 
     QVBoxLayout *buttonLayout = new QVBoxLayout(buttonOverlay);
-    buttonLayout -> setContentsMargins(2,2,2,2);
-    buttonLayout -> addWidget(button);
-    buttonLayout -> addStretch();
+    buttonLayout->setContentsMargins(2, 2, 2, 2);
+    buttonLayout->addWidget(button);
+    buttonLayout->addStretch();
 
-    // initial position inside viewport
-    buttonOverlay -> move(10, 10);
-    buttonOverlay -> raise();
-    buttonOverlay -> show();
+    buttonOverlay->move(10, 10);
+    buttonOverlay->raise();
+    buttonOverlay->show();
 
-    // Keep overlay positioned on chart container resize: install event filter on chartview->viewport()
-    chartview -> viewport() -> installEventFilter(this);
+    chartview->viewport()->installEventFilter(this);
 
+    // --- POŁĄCZENIA SYGNAŁÓW ---
     connect(drawer, &drawer::functionAdded, this, &MainWindow::onFunctionAdded);
     connect(drawer, &drawer::functionRemoved, this, &MainWindow::onFunctionRemoved);
 }

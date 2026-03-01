@@ -25,6 +25,7 @@ public:
     void openDrawer();
     bool eventFilter(QObject *obj, QEvent *event);
 
+
 private:
     Ui::MainWindow *ui;
     drawer *drawer;
@@ -34,9 +35,10 @@ private:
     QValueAxis* axisX;
     QValueAxis* axisY;
 
-private slots:
+public slots:
     void onFunctionAdded(const QString &exprStr);
     void onFunctionRemoved(const QString &exprStr);
+    void onFuntionRejected();
 };
 
 #endif // MAINWINDOW_H

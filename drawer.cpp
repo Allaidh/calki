@@ -90,6 +90,7 @@ void drawer::addFunction()
     functionInput -> clear();
 }
 
+
 void drawer::clearLayout(QVBoxLayout* layout){
     if (!layout) return;
 
