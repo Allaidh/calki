@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QLabel>
+#include <QCheckBox>
 extern "C" {
 #include "tinyexpr.h"
 }

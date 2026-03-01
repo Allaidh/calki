@@ -117,6 +117,10 @@ void drawer::wypisz(QVBoxLayout* layout) {
         delButton->setStyleSheet("background-color: #810000; color: white;");
         delButton -> setFixedWidth(40);
 
+        QPushButton* calka = new QPushButton("∫", this);
+        calka->setStyleSheet("background-color: #333333; color: white;");
+        calka -> setFixedWidth(40);
+
         QString text = funkcje[i];
 
         connect(delButton, &QPushButton::clicked, this, [this, label, text]() {
@@ -141,9 +145,44 @@ void drawer::wypisz(QVBoxLayout* layout) {
             clearLayout(functions);
             wypisz(functions);
         });
+        connect(calka, &QPushButton::clicked, this, [this, label, text]() {
+
+            QWidget *window = new QWidget();
+            window->setWindowTitle("Nowe okno");
+            window->resize(400, 300);
+            window->show();
+
+            QVBoxLayout *layout = new QVBoxLayout(window);
+            QHBoxLayout *hlayout = new QHBoxLayout();
+
+            QLineEdit *a = new QLineEdit();
+            a->setPlaceholderText("Podaj a:");
+
+            QLineEdit *b = new QLineEdit();
+            b->setPlaceholderText("Podaj b:");
+
+            QCheckBox *check = new QCheckBox("Kocham femboyi :3");
+
+
+            QPushButton* guzior = new QPushButton("Wprowadź", this);
+
+            hlayout->addWidget(a);
+            hlayout->addWidget(b);
+
+
+
+            layout->addLayout(hlayout);
+            layout->addWidget(check);
+            layout->addStretch();
+            layout->addWidget(guzior);
+
+
+
+        });
 
         hLayout->addWidget(label);
         hLayout->addWidget(delButton);
+        hLayout->addWidget(calka);
         hLayout->addStretch();
         layout->addLayout(hLayout);
     }
