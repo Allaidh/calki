@@ -83,8 +83,7 @@ void drawer::addFunction()
 
     emit functionAdded(text);
 
-    funkcje[ile] = text;
-    ile++;
+
     clearLayout(functions);
     wypisz(functions);
     functionInput -> clear();

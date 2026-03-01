@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     int zakres = 10;
 
     QLineSeries *series = new QLineSeries();
-    QChart *chart = new QChart();
+    chart = new QChart();
     chart->legend()->hide();
     chart->addSeries(series);
 
@@ -210,6 +210,38 @@ void MainWindow::onFunctionAdded(const QString &exprStr)
             series->append(xv, te_eval(expr));
         }
 
+        //dodawanie pola pod wykresem
+        QLineSeries *gorna = series;  // Twoja funkcja
+
+        QLineSeries *dolna = new QLineSeries();
+        dolna->append(series->at(0).x(), 0);
+
+        for(int i = 1; i < series->count(); i++)
+        {
+            dolna->append(series->at(i).x(), 0);
+        }
+
+        QAreaSeries *area = new QAreaSeries(gorna, dolna);
+        QColor kolorLinii = series->pen().color();
+        kolorLinii.setAlpha(100); // 0 = całkowicie przezroczysty, 255 = całkowicie kryjący
+        area->setColor(kolorLinii); // półprzezroczyste wypełnienie
+
+
+        double integral = calculateIntegral(expr, -10, 10, 0.1, &x);
+        QMessageBox::information(this, "Całka",
+                                 QString("Całka funkcji %1 od -10 do 10 wynosi %2")
+                                     .arg(exprStr)
+                                     .arg(integral));
+
+        chart->addSeries(area);
+        areasList.append(area);
+        area->attachAxis(axisX);
+        area->attachAxis(axisY);
+        //---------------------------
+
+        drawer->funkcje[drawer->ile] = exprStr;
+        drawer->ile++;
+
         QChart *chart = chartview->chart();
         chart->addSeries(series);
         series->attachAxis(axisX);
@@ -217,6 +249,7 @@ void MainWindow::onFunctionAdded(const QString &exprStr)
         te_free(expr);
     } else {
         QMessageBox::warning(this, "Błąd", "Nieprawidłowe wyrażenie!");
+
     }
 }
 
@@ -228,6 +261,47 @@ void MainWindow::onFunctionRemoved(const QString &exprStr)
         chart->removeSeries(series);
         delete series;
         seriesList.removeAt(i);
+        QAreaSeries *area = areasList.at(i);
+        chart->removeSeries(area);
+        delete area;
+        areasList.removeAt(i);
         break;
     }
+}
+
+double MainWindow::calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr)
+{
+    double& x = *xPtr; // tinyexpr zmienna
+    double sum = 0.0;
+    int n = static_cast<int>(ceil((b - a) / step));
+    for(int i = 0; i < n; ++i)
+    {
+        double x0 = a + i * step;
+        double x1 = a + (i + 1) * step;
+
+        x = x0;
+        double y0 = te_eval(expr);
+
+        x = x1;
+        double y1 = te_eval(expr);
+
+        sum += (y0 + y1) / 2.0 * step;
+    }
+
+    double last = a + n * step;
+    if(last < b)
+    {
+        x = last;
+        double y0 = te_eval(expr);
+        x = b;
+        double y1 = te_eval(expr);
+        sum += (y0 + y1) / 2.0 * (b - last);
+    }
+
+    if(a == -b && fabs(sum) < 1e-12) // jeśli przedział symetryczny i suma bardzo mała
+    {
+        sum = 0.0; // traktujemy jako dokładnie 0
+    }
+
+    return sum;
 }

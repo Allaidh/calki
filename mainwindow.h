@@ -7,6 +7,7 @@
 #include <QValueAxis>
 #include <QList>
 #include <QLineSeries>
+#include <QAreaSeries>
 #include "drawer.h"
 
 QT_BEGIN_NAMESPACE
@@ -24,6 +25,8 @@ public:
     ~MainWindow();
     void openDrawer();
     bool eventFilter(QObject *obj, QEvent *event);
+    double calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr);
+    QChart *chart;
 
 
 private:
@@ -32,13 +35,13 @@ private:
     QPushButton *button;
     QChartView *chartview;
     QList<QLineSeries*> seriesList;
+    QList<QAreaSeries*> areasList;
     QValueAxis* axisX;
     QValueAxis* axisY;
 
 public slots:
     void onFunctionAdded(const QString &exprStr);
     void onFunctionRemoved(const QString &exprStr);
-    void onFuntionRejected();
 };
 
 #endif // MAINWINDOW_H
