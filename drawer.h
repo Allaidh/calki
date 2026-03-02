@@ -20,6 +20,9 @@ public:
     void add(const QString &exprStr);
     double calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr);
     QVBoxLayout *functions;
+    QHBoxLayout *zakresik;
+    QLineEdit *Izakresik;
+    void zmiana_zakresu();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -40,6 +43,7 @@ signals:
     void functionAdded(const QString &exprStr, const QColor &color, double a, double b);  // ✅ Z zakresami
     void functionRemoved(const QString &exprStr);
     void integralChanged(int index, double a, double b, double result);  // ✅ Nowy signal
+    void requestSomething();   // sygnał
 };
 
 #endif // DRAWER_H

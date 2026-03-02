@@ -53,10 +53,33 @@ void drawer::setupUI() {
     layout->addLayout(functions);
     layout->addStretch();
 
+    zakresik = new QHBoxLayout();
+
+    Izakresik = new QLineEdit(this);
+    Izakresik->setPlaceholderText("Podaj zakres");
+    Izakresik->setStyleSheet("background-color: #1e1e1e; color: white; padding: 0; margin: 0; margin-left: 25px;");
+
+    QPushButton *Bzakresik = new QPushButton("Ustaw zakres", this);
+    Bzakresik->setFixedWidth(100);
+    Bzakresik->setStyleSheet("background-color: #1e1e1e; color: white; padding: 2px; margin: 0; ");
+
+    QIntValidator *validator = new QIntValidator(0, 100, this);
+
+    Izakresik->setValidator(validator);
+
+    zakresik->addWidget(Izakresik);
+    zakresik->addWidget(Bzakresik);
+    zakresik->addStretch();
+
+    layout->addLayout(zakresik);
+
+    wypisz(functions);
+
     setLayout(layout);
 
     connect(drawButton, &QPushButton::clicked, this, &drawer::addFunction);
     connect(colorButton, &QPushButton::clicked, this, &drawer::pickColor);
+    connect(Bzakresik, &QPushButton::clicked, this, &drawer::zmiana_zakresu);
 
     this->setStyleSheet("background-color: lightgray;");
 }
@@ -278,6 +301,7 @@ void drawer::wypisz(QVBoxLayout* layout) {
             setTabOrder(calka, delButton); // ∫ -> ❌
         }
     }
+
 }
 double drawer::calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr)
 {
@@ -314,4 +338,13 @@ double drawer::calculateIntegral(te_expr* expr, double a, double b, double step,
     }
 
     return sum;
+}
+void drawer::zmiana_zakresu()
+{
+
+    QString text = Izakresik->text();
+    zakres = text.toInt();
+    ile = 0;
+    clearLayout(functions);
+    emit requestSomething();
 }

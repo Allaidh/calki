@@ -31,6 +31,7 @@ public:
     bool eventFilter(QObject *obj, QEvent *event);
     double calculateIntegral(te_expr* expr, double a, double b, double step, double* xPtr);
     QChart *chart;
+    void LoadChart();
 
 private:
     Ui::MainWindow *ui;
@@ -45,6 +46,7 @@ public slots:
     void onFunctionAdded(const QString &exprStr, const QColor &color, double a, double b);  // ✅ Z zakresami
     void onFunctionRemoved(const QString &exprStr);
     void onIntegralChanged(int index, double a, double b, double result);  // ✅ Nowy slot
+    void handleRequest();
 };
 
 #endif // MAINWINDOW_H

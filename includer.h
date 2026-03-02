@@ -1,6 +1,10 @@
 #ifndef INCLUDER_H
 #define INCLUDER_H
 
+// ============================================
+// GLOBAL VARIABLES
+// ============================================
+#include "zakres.h"
 #include "ui_mainwindow.h"
 // ============================================
 // QT CORE
