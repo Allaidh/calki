@@ -68,13 +68,13 @@ void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color, do
         QLineSeries *series = new QLineSeries();
         series->setPen(QPen(color, 2));
 
-        // ✅ Generowanie punktów funkcji
+
         for (double xv = -zakres; xv <= zakres; xv += 0.1) {
             x = xv;
             series->append(xv, te_eval(expr));
         }
 
-        // ✅ Linia dolna dla obszaru pod wykresem
+
         QLineSeries *gorna = series;
         QLineSeries *dolna = new QLineSeries();
         dolna->append(series->at(0).x(), 0);
@@ -88,7 +88,6 @@ void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color, do
         area->setBrush(QBrush(fillColor));
         area->setPen(QPen(color, 1));
 
-        // ✅ Obszar CAŁKI (pomiędzy a i b)
         QLineSeries *integralUpper = new QLineSeries();
         QLineSeries *integralLower = new QLineSeries();
 
@@ -97,7 +96,7 @@ void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color, do
             integralUpper->append(xv, te_eval(expr));
             integralLower->append(xv, 0);
         }
-        // ✅ Dodaj ostatni punkt jeśli nie trafił w krok
+
         if (integralUpper->count() == 0 || integralUpper->at(integralUpper->count() - 1).x() < b) {
             x = b;
             integralUpper->append(b, te_eval(expr));
@@ -106,15 +105,15 @@ void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color, do
 
         QAreaSeries *integralArea = new QAreaSeries(integralUpper, integralLower);
         QColor integralColor = color;
-        integralColor.setAlpha(150);  // ✅ Bardziej widoczny obszar całki
+        integralColor.setAlpha(150);
         integralArea->setBrush(QBrush(integralColor));
         integralArea->setPen(QPen(color, 2));
 
-        // ✅ Oblicz całkę
+
         double integral = calculateIntegral(expr, a, b, 0.01, &x);
         drawer->wyniki[drawer->ile - 1] = integral;
 
-        // ✅ Dodaj do wykresu
+        // Dodaj do wykresu
         chart->addSeries(area);
         chart->addSeries(series);
         chart->addSeries(integralArea);
@@ -131,9 +130,11 @@ void MainWindow::onFunctionAdded(const QString &exprStr, const QColor &color, do
         drawer->funkcje[drawer->ile] = exprStr;
         drawer->ile++;
 
-        // ✅ Odśwież listę z wynikami
+
         drawer->clearLayout(drawer->functions);
         drawer->wypisz(drawer->functions);
+
+
 
         te_free(expr);
     } else {
@@ -155,7 +156,7 @@ void MainWindow::onFunctionRemoved(const QString &exprStr)
             chart->removeSeries(seriesList[i].area);
             delete seriesList[i].area;
 
-            chart->removeSeries(seriesList[i].integralArea);  // ✅ Usuń obszar całki
+            chart->removeSeries(seriesList[i].integralArea);
             delete seriesList[i].integralArea;
 
             seriesList.removeAt(i);
@@ -170,11 +171,11 @@ void MainWindow::onIntegralChanged(int index, double a, double b, double result)
 
     QChart *chart = chartview->chart();
 
-    // ✅ Usuń stary obszar całki
+
     chart->removeSeries(seriesList[index].integralArea);
     delete seriesList[index].integralArea;
 
-    // ✅ Utwórz nowy obszar całki
+
     double x;
     te_variable vars[] = {{"x", &x}};
     int err;
@@ -207,7 +208,7 @@ void MainWindow::onIntegralChanged(int index, double a, double b, double result)
         integralArea->attachAxis(axisX);
         integralArea->attachAxis(axisY);
 
-        // ✅ Zaktualizuj listę
+
         seriesList[index].integralArea = integralArea;
         seriesList[index].a = a;
         seriesList[index].b = b;
@@ -287,7 +288,7 @@ void MainWindow::LoadChart()
     xAxisLine->attachAxis(axisY);
 
     // --- STRZAŁKI (GROTY OSI) ---
-    double arrowSize = zakres * 0.01;   // 3% zakresu
+    double arrowSize = zakres * 0.01;
 
     QLineSeries *xArrow1 = new QLineSeries();
     QLineSeries *xArrow2 = new QLineSeries();
@@ -328,7 +329,7 @@ void MainWindow::LoadChart()
     drawer->setFixedWidth(600);
     drawer->setStyleSheet("background-color: #BADAFE;");
 
-    // Central widget + layout
+
     QWidget *centralWidget = new QWidget(this);
     QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
     mainLayout->setContentsMargins(0, 0, 0, 0);

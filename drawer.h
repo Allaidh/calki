@@ -40,9 +40,9 @@ private slots:
     void pickColor();
 
 signals:
-    void functionAdded(const QString &exprStr, const QColor &color, double a, double b);  // ✅ Z zakresami
+    void functionAdded(const QString &exprStr, const QColor &color, double a, double b);
     void functionRemoved(const QString &exprStr);
-    void integralChanged(int index, double a, double b, double result);  // ✅ Nowy signal
+    void integralChanged(int index, double a, double b, double result);
     void requestSomething();   // sygnał
 };
 

@@ -14,10 +14,10 @@ struct FunctionSeries {
     QString expression;
     QLineSeries* series;
     QAreaSeries* area;
-    QAreaSeries* integralArea;  // ✅ Obszar całki
+    QAreaSeries* integralArea;
     QColor color;
-    double a;  // ✅ Początek zakresu
-    double b;  // ✅ Koniec zakresu
+    double a;
+    double b;
 };
 
 class MainWindow : public QMainWindow
@@ -43,9 +43,9 @@ private:
     QValueAxis* axisY;
 
 public slots:
-    void onFunctionAdded(const QString &exprStr, const QColor &color, double a, double b);  // ✅ Z zakresami
+    void onFunctionAdded(const QString &exprStr, const QColor &color, double a, double b);
     void onFunctionRemoved(const QString &exprStr);
-    void onIntegralChanged(int index, double a, double b, double result);  // ✅ Nowy slot
+    void onIntegralChanged(int index, double a, double b, double result);
     void handleRequest();
 };
 

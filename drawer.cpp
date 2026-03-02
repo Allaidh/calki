@@ -4,7 +4,7 @@ drawer::drawer(QWidget *parent) : QWidget(parent), isOpen(false) {
     ile = 0;
     // Inicjalizacja tablic
     for(int i = 0; i < 20; i++) {
-        zakresA[i] = -10.0;  // ✅ Domyślny zakres
+        zakresA[i] = -10.0;
         zakresB[i] = 10.0;
         wyniki[i] = 0.0;
     }
@@ -112,10 +112,10 @@ void drawer::addFunction()
     }
 
     kolory[ile] = currentColor;
-    zakresA[ile] = -10.0;  // ✅ Domyślny zakres
+    zakresA[ile] = -10.0;
     zakresB[ile] = 10.0;
 
-    // ✅ Emituj signal z zakresami
+
     emit functionAdded(text, currentColor, zakresA[ile], zakresB[ile]);
 
     currentColor = QColor(QRandomGenerator::global()->bounded(256),
@@ -145,43 +145,43 @@ void drawer::wypisz(QVBoxLayout* layout) {
         QHBoxLayout* hLayout = new QHBoxLayout();
         hLayout->setSpacing(3);
 
-        // ✅ Kolor
+
         QLabel* colorLabel = new QLabel(this);
         colorLabel->setFixedSize(15, 15);
         colorLabel->setStyleSheet(QString("background-color: %1; border: 1px solid white;")
                                       .arg(kolory[i].name()));
 
-        // ✅ Wzór funkcji
+
         QLabel* label = new QLabel(funkcje[i], this);
         label->setStyleSheet("color: white; background-color: #1e1e1e; padding: 3px;");
         label->setFixedWidth(90);
 
-        // ✅ Input a
+
         QLineEdit *inputA = new QLineEdit();
         inputA->setPlaceholderText("a");
         inputA->setFixedWidth(40);
         inputA->setStyleSheet("background-color: #1e1e1e; color: white;");
         inputA->setText(QString::number(zakresA[i]));
 
-        // ✅ Input b
+
         QLineEdit *inputB = new QLineEdit();
         inputB->setPlaceholderText("b");
         inputB->setFixedWidth(40);
         inputB->setStyleSheet("background-color: #1e1e1e; color: white;");
         inputB->setText(QString::number(zakresB[i]));
 
-        // ✅ Przycisk całki
+
         QPushButton* calka = new QPushButton("∫", this);
         calka->setStyleSheet("background-color: #333333; color: white;");
         calka->setFixedWidth(30);
 
-        // ✅ Wynik
+
         QLabel* wynik = new QLabel(QString("P=%1").arg(wyniki[i], 0, 'f', 2), this);
         wynik->setStyleSheet("color: white; background-color: #1e1e1e; padding: 3px;");
         wynik->setFixedWidth(70);
         wynik->setAlignment(Qt::AlignCenter);
 
-        // ✅ Przycisk usuwania
+
         QPushButton* delButton = new QPushButton("❌", this);
         delButton->setStyleSheet("background-color: #810000; color: white;");
         delButton->setFixedWidth(30);
@@ -190,7 +190,7 @@ void drawer::wypisz(QVBoxLayout* layout) {
         QColor funcColor = kolory[i];
         int index = i;
 
-        // ✅ POŁĄCZENIA (bez zmian)
+
         connect(delButton, &QPushButton::clicked, this, [this, text]() {
             int idx = -1;
             for (int j = 0; j < ile; j++) {
@@ -258,7 +258,7 @@ void drawer::wypisz(QVBoxLayout* layout) {
             te_free(expr);
         });
 
-        // ✅ Dodawanie do layoutu
+
         hLayout->addWidget(colorLabel);
         hLayout->addWidget(label);
         hLayout->addWidget(inputA);
@@ -270,15 +270,13 @@ void drawer::wypisz(QVBoxLayout* layout) {
 
         layout->addLayout(hLayout);
 
-        // ✅ USTAWIANIE KOLEJNOŚCI TAB - TO JEST KLUCZOWE!
+
         if (i == 0) {
-            // Pierwszy wiersz - zaczynamy od inputA
             setTabOrder(inputA, inputB);
             setTabOrder(inputB, calka);
             setTabOrder(calka, delButton);
         } else {
-            // Kolejne wiersze - łączymy z poprzednim
-            // Musimy znaleźć widgety z poprzedniego wiersza
+
             QWidget *prevInputB = nullptr;
             QWidget *prevDelButton = nullptr;
 
@@ -287,18 +285,17 @@ void drawer::wypisz(QVBoxLayout* layout) {
             if (prevItem && prevItem->layout()) {
                 QHBoxLayout *prevHLayout = qobject_cast<QHBoxLayout*>(prevItem->layout());
                 if (prevHLayout) {
-                    // InputB jest na indeksie 3, delButton na końcu
                     prevInputB = prevHLayout->itemAt(3)->widget();
                     prevDelButton = prevHLayout->itemAt(prevHLayout->count() - 1)->widget();
                 }
             }
 
             if (prevDelButton) {
-                setTabOrder(prevDelButton, inputA);  // Poprzedni ❌ -> obecny a
+                setTabOrder(prevDelButton, inputA);
             }
-            setTabOrder(inputA, inputB);  // a -> b
-            setTabOrder(inputB, calka);   // b -> ∫
-            setTabOrder(calka, delButton); // ∫ -> ❌
+            setTabOrder(inputA, inputB);
+            setTabOrder(inputB, calka);
+            setTabOrder(calka, delButton);
         }
     }
 
